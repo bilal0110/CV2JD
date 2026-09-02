@@ -1,0 +1,40 @@
+# ==========================================
+  # BACKEND CI
+  # ==========================================
+  backend:
+    name: Backend CI
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Python
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: backend/requirements.txt
+
+      # 3. Upgrade pip & install testing dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest httpx
+          if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+
+      # 4. Validate Python imports
+      - name: Validate backend imports
+        run: |
+          python -c "import fastapi"
+          python -c "import uvicorn"
+          python -c "import pydantic"
+          echo "Backend core dependencies imported successfully."
+
+      # 5. Run Pytest Suite
+      - name: Run Pytest
+        env:
+          PYTHONPATH: .
+        run: python -m pytest -v
